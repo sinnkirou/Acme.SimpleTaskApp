@@ -10,6 +10,13 @@
     "TaskList": "Task List",
     "TaskState_Open": "Open",
     "TaskState_Completed": "Completed",
-    "AllTasks": "All Tasks"
+    "AllTasks": "All Tasks",
+    "Unassigned": "Unassigned",
+    "AddNew": "Add new",
+    "NewTask": "New task",
+    "Title": "Title",
+    "Description": "Description",
+    "AssignedPerson": "Assigned person",
+    "Save": "SAVE"
   }
 }

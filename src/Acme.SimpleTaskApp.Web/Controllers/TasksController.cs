@@ -2,19 +2,25 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Abp.Application.Services.Dto;
+using Acme.SimpleTaskApp.Common;
 using Acme.SimpleTaskApp.Tasks.Dtos;
+using Acme.SimpleTaskApp.Web.Models.People;
 using Acme.SimpleTaskApp.Web.Models.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace Acme.SimpleTaskApp.Web.Controllers
 {
     public class TasksController : SimpleTaskAppControllerBase
     {
         private readonly ITaskAppService _taskAppService;
+        private readonly ILookupAppService _lookupAppService;
 
-        public TasksController(ITaskAppService taskAppService)
+        public TasksController(ITaskAppService taskAppService, ILookupAppService lookupAppService)
         {
             _taskAppService = taskAppService;
+            _lookupAppService = lookupAppService;
         }
 
         public async Task<ActionResult> Index(GetAllTasksInput input)
@@ -25,6 +31,17 @@ namespace Acme.SimpleTaskApp.Web.Controllers
                 SelectedTaskState = input.State
             };
             return View(model);
+        }
+
+        public async Task<ActionResult> Create()
+        {
+            var peopleSelectListItems = (await _lookupAppService.GetPeopleComboboxItems()).Items
+                .Select(p => p.ToSelectListItem())
+                .ToList();
+
+            peopleSelectListItems.Insert(0, new SelectListItem { Value = string.Empty, Text = L("Unassigned"), Selected = true });
+
+            return View(new CreateTaskViewModel(peopleSelectListItems));
         }
     }
 }
