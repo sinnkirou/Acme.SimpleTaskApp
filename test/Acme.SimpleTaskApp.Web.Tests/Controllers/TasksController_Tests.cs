@@ -3,10 +3,7 @@ using Acme.SimpleTaskApp.Web.Controllers;
 using AngleSharp.Parser.Html;
 using Microsoft.EntityFrameworkCore;
 using Shouldly;
-using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using Xunit;
 
 namespace Acme.SimpleTaskApp.Web.Tests.Controllers
