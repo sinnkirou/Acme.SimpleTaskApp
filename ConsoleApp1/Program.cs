@@ -1,7 +1,7 @@
 ﻿using Acme.SimpleTaskApp.Tasks;
 using ConsoleApp1.Utilty;
 using System;
-using System.Configuration; 
+using System.Configuration;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.OleDb;
@@ -24,14 +24,14 @@ namespace ConsoleApp1
             var tasks = DataConvert<Tasks>.ToList(tb);
 
             List<TaskDto> taskSqls = ConvertToSqlFields(tasks);
-            string sql = SqlBuilderHelper.BulkInsertSql(taskSqls, "AppTasks");
-            StringBuilder sqls =new StringBuilder();
-            taskSqls.ForEach(task => {
+            //string sqls = SqlBuilderHelper.BulkInsertSql(taskSqls, "AppTasks");
+            StringBuilder sqls = new StringBuilder();
+            taskSqls.ForEach(task =>
+            {
                 sqls.Append(SqlBuilderHelper.InsertSql(task, "AppTasks"));
                 sqls.AppendLine();
             });
-            //CreateSqlFile(sql);
-            CreateSqlFile(sql.ToString());
+            CreateSqlFile(sqls.ToString());
             Console.WriteLine(sqls);
             Console.WriteLine("Successful.");
             Console.ReadLine();
@@ -39,7 +39,14 @@ namespace ConsoleApp1
 
         private static DataTable GetExcelTable(string excelFilename)
         {
-            string connectionString = string.Format("Provider=Microsoft.Jet.OLEDB.4.0;Data Source={0};Jet OLEDB:Engine Type=35;Extended Properties=Excel 8.0;Persist Security Info=False", excelFilename);
+            string fileType = System.IO.Path.GetExtension(excelFilename);
+            if (string.IsNullOrEmpty(fileType)) return null;
+            string connectionString;
+
+            if (fileType == ".xls")
+                connectionString = string.Format("Provider=Microsoft.Jet.OLEDB.4.0;Data Source={0};" + "Extended Properties='Excel 8.0;HDR=YES;IMEX=1'", excelFilename);
+            else
+                connectionString = string.Format("Provider=Microsoft.ACE.OLEDB.12.0;Data Source={0};" + "Extended Properties='Excel 12.0 Xml;HDR=YES;IMEX=1;'", excelFilename);
             DataSet ds = new DataSet();
             string tableName;
             using (System.Data.OleDb.OleDbConnection connection = new System.Data.OleDb.OleDbConnection(connectionString))
@@ -47,7 +54,8 @@ namespace ConsoleApp1
                 connection.Open();
                 DataTable table = connection.GetOleDbSchemaTable(System.Data.OleDb.OleDbSchemaGuid.Tables, null);
                 tableName = table.Rows[0]["Table_Name"].ToString();
-                string strExcel = "select * from " + "[" + tableName + "]";
+                tableName = tableName.Replace("'", "");
+                string strExcel = "select * from " + "[" + tableName + "A3:D]";
                 OleDbDataAdapter adapter = new OleDbDataAdapter(strExcel, connectionString);
                 adapter.Fill(ds, tableName);
                 connection.Close();
