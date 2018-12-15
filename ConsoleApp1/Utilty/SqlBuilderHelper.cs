@@ -1,5 +1,6 @@
 ﻿using DbExtensions;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Data.SqlClient;
 using System.Linq;
 using System.Text;
@@ -23,24 +24,21 @@ namespace ConsoleApp1.Utilty
             {
                 return string.Empty;
             }
-            string[] columns = GetColmons(t);
-            if (columns.Length<=0)
+            string columns = GetColmons(t);
+            if (string.IsNullOrEmpty(columns))
             {
                 return string.Empty;
             }
-            string[] values = GetValues(t);
-            if (values.Length<=0)
+            string values = GetValues(t);
+            if (string.IsNullOrEmpty(values))
             {
                 return string.Empty;
             }
             StringBuilder sql = new StringBuilder();
+            
             sql.Append("Insert into " + tableName);
-            //var sql = SQL
-            //   .INSERT_INTO(tableName+"("+string.Join(",",columns)+")")
-            //   .VALUES(values);
-
-            sql.Append("(" + string.Join(",", columns) + ")");
-            sql.Append(" values(" +  string.Join(",",  values) + ")");
+            sql.Append("(" + columns + ")");
+            sql.Append(" values(" + values + ")");
             return sql.ToString();
         }
 
@@ -60,13 +58,14 @@ namespace ConsoleApp1.Utilty
             {
                 return string.Empty;
             }
-            string[] columns = GetColmons(objs[0]);
-            if (columns.Length<=0)
+            string columns = GetColmons(objs[0]);
+            if (string.IsNullOrEmpty(columns))
             {
                 return string.Empty;
             }
             string values = string.Join(",", objs.Select(p => string.Format("({0})", GetValues(p))).ToArray());
             StringBuilder sql = new StringBuilder();
+
             sql.Append("Insert into " + tableName);
             sql.Append("(" + columns + ")");
             sql.Append(" values " + values + "");
@@ -78,13 +77,13 @@ namespace ConsoleApp1.Utilty
         /// </summary>
         /// <param name="obj"></param>
         /// <returns></returns>
-        private static string[] GetColmons<T>(T obj)
+        private static string GetColmons<T>(T obj)
         {
             if (obj == null)
             {
-                return new string[] { };
+                return string.Empty;
             }
-            return obj.GetType().GetProperties().Select(p => p.Name).ToArray();
+            return string.Join(",", obj.GetType().GetProperties().Select(p => p.Name).ToList());
         }
 
         /// <summary>
@@ -92,14 +91,13 @@ namespace ConsoleApp1.Utilty
         /// </summary>
         /// <param name="obj"></param>
         /// <returns></returns>
-        private static string[] GetValues<T>(T obj)
+        private static string GetValues<T>(T obj)
         {
-            
             if (obj == null)
             {
-                return new string[] { };
+                return string.Empty;
             }
-            return obj.GetType().GetProperties().Select(p => string.Format("'{0}'", formateSql(p.GetValue(obj).ToString()))).ToArray();
+            return string.Join(",", obj.GetType().GetProperties().Select(p => string.Format("'{0}'", formateSql(p.GetValue(obj).ToString()))).ToArray());
         }
 
         private static string formateSql(string text)

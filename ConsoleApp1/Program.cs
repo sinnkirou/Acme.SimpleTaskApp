@@ -24,13 +24,21 @@ namespace ConsoleApp1
             var tasks = DataConvert<Tasks>.ToList(tb);
 
             List<TaskDto> taskSqls = ConvertToSqlFields(tasks);
-            //string sqls = SqlBuilderHelper.BulkInsertSql(taskSqls, "AppTasks");
             StringBuilder sqls = new StringBuilder();
-            taskSqls.ForEach(task =>
-            {
-                sqls.Append(SqlBuilderHelper.InsertSql(task, "AppTasks"));
-                sqls.AppendLine();
-            });
+            string dbName = ConfigurationManager.AppSettings["dbName"];
+            sqls.Append("Set IDENTITY_INSERT " + dbName + " on;");
+            sqls.AppendLine();
+
+            //bulk
+            string sql = SqlBuilderHelper.BulkInsertSql(taskSqls, "AppTasks");
+            sqls.Append(sql);
+            
+            //single
+            //taskSqls.ForEach(task =>
+            //{
+            //    sqls.Append(SqlBuilderHelper.InsertSql(task, "AppTasks"));
+            //    sqls.AppendLine();
+            //});
             CreateSqlFile(sqls.ToString());
             Console.WriteLine(sqls);
             Console.WriteLine("Successful.");
